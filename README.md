@@ -10,6 +10,12 @@ Governments regulate what they can see. The public oversees what it can find. Th
 [![Data: CSV + GeoJSON](https://img.shields.io/badge/Data-CSV%20%2B%20GeoJSON-green.svg)](#data-formats)
 [![Facilities](https://img.shields.io/badge/Facilities-18%2C524-orange.svg)](#status)
 
+<p align="center">
+<img src="assets/map.png" alt="Global data center map — 18,524 facilities" width="100%">
+</p>
+
+<p align="center"><em>18,524 data centers across 225+ countries. Red = power capacity known. Cyan = location only.</em></p>
+
 ---
 
 ## Why this exists
