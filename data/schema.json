@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "human-override data center record",
+  "type": "object",
+  "required": ["id", "name", "latitude", "longitude", "country_code", "status", "sources"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z]{2}-[a-z0-9-]+$",
+      "description": "Unique ID: country code + slugified name, e.g. us-equinix-sv5"
+    },
+    "name": {
+      "type": "string",
+      "description": "Facility name as used by the operator"
+    },
+    "operator": {
+      "type": "string",
+      "description": "Company operating the facility"
+    },
+    "owner": {
+      "type": "string",
+      "description": "Company owning the facility (if different from operator)"
+    },
+    "address": {
+      "type": "string",
+      "description": "Street address"
+    },
+    "city": {
+      "type": "string"
+    },
+    "state_province": {
+      "type": "string"
+    },
+    "country": {
+      "type": "string",
+      "description": "Full country name"
+    },
+    "country_code": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO 3166-1 alpha-2 country code"
+    },
+    "latitude": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "longitude": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "status": {
+      "type": "string",
+      "enum": ["operational", "construction", "planned", "decommissioned", "unknown"]
+    },
+    "facility_type": {
+      "type": "string",
+      "enum": ["hyperscale", "colocation", "enterprise", "edge", "government", "research", "unknown"]
+    },
+    "year_built": {
+      "type": ["integer", "null"],
+      "minimum": 1960,
+      "maximum": 2035
+    },
+    "year_decommissioned": {
+      "type": ["integer", "null"]
+    },
+    "power_capacity_mw": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Total IT power capacity in megawatts"
+    },
+    "backup_power_type": {
+      "type": ["string", "null"],
+      "enum": ["diesel", "battery", "gas", "hybrid", "none", null]
+    },
+    "backup_power_duration_hours": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "grid_operator": {
+      "type": ["string", "null"],
+      "description": "Electric utility or grid operator"
+    },
+    "grid_substation": {
+      "type": ["string", "null"],
+      "description": "Nearest electrical substation"
+    },
+    "on_site_generation_type": {
+      "type": ["string", "null"],
+      "enum": ["solar", "wind", "gas", "nuclear", "diesel", "mixed", "none", null]
+    },
+    "on_site_generation_mw": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "cooling_type": {
+      "type": ["string", "null"],
+      "enum": ["air", "liquid", "immersion", "hybrid", "unknown", null]
+    },
+    "water_usage_m3_per_day": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Water consumption in cubic meters per day"
+    },
+    "pue": {
+      "type": ["number", "null"],
+      "minimum": 1.0,
+      "maximum": 5.0,
+      "description": "Power Usage Effectiveness ratio"
+    },
+    "total_area_sqm": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "Total facility area in square meters"
+    },
+    "ai_workload": {
+      "type": "string",
+      "enum": ["training", "inference", "both", "none", "unknown"],
+      "default": "unknown",
+      "description": "Known AI workload type"
+    },
+    "ai_workload_confidence": {
+      "type": "string",
+      "enum": ["confirmed", "reported", "suspected", "none"],
+      "default": "none",
+      "description": "Confidence level for AI workload classification"
+    },
+    "known_ai_tenants": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Publicly known AI company tenants"
+    },
+    "gpu_cluster_known": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether GPU clusters are publicly known to exist at this facility"
+    },
+    "fiber_providers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Connected fiber network providers"
+    },
+    "ix_connections": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Internet exchange connections"
+    },
+    "submarine_cable_landing": {
+      "type": "boolean",
+      "default": false
+    },
+    "jurisdiction": {
+      "type": ["string", "null"],
+      "description": "Legal jurisdiction governing the facility"
+    },
+    "government_facility": {
+      "type": "boolean",
+      "default": false
+    },
+    "sources": {
+      "type": "array",
+      "items": { "type": "string", "format": "uri" },
+      "minItems": 1,
+      "description": "URLs verifying the data in this record"
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this record was last verified (YYYY-MM-DD)"
+    },
+    "seed_source": {
+      "type": ["string", "null"],
+      "description": "Original dataset this record was seeded from"
+    },
+    "notes": {
+      "type": ["string", "null"]
+    }
+  }
+}

@@ -1,0 +1,26 @@
+name: Update a data center record
+description: Correct or enrich an existing record
+title: "[UPDATE] "
+labels: ["enrichment"]
+body:
+  - type: input
+    id: record_id
+    attributes:
+      label: Record ID or facility name
+      placeholder: "e.g. us-equinix-sv5"
+    validations:
+      required: true
+  - type: textarea
+    id: changes
+    attributes:
+      label: What should be updated?
+      description: Describe the fields to add or correct
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: URLs verifying the update
+    validations:
+      required: true

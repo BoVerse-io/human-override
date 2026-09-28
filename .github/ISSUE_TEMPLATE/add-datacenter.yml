@@ -1,0 +1,98 @@
+name: Add a data center
+description: Submit a data center to be added to the dataset
+title: "[ADD] "
+labels: ["new-facility"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing! Fill in what you know — every field helps, but only `name`, `country`, and `source` are required.
+  - type: input
+    id: name
+    attributes:
+      label: Facility name
+      placeholder: "e.g. Equinix SV5"
+    validations:
+      required: true
+  - type: input
+    id: operator
+    attributes:
+      label: Operator
+      placeholder: "e.g. Equinix"
+  - type: input
+    id: address
+    attributes:
+      label: Address
+      placeholder: "Full street address"
+  - type: input
+    id: city
+    attributes:
+      label: City
+  - type: input
+    id: country
+    attributes:
+      label: Country
+    validations:
+      required: true
+  - type: input
+    id: coordinates
+    attributes:
+      label: Coordinates (latitude, longitude)
+      placeholder: "e.g. 37.3861, -122.0839"
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - operational
+        - construction
+        - planned
+        - decommissioned
+        - unknown
+  - type: dropdown
+    id: facility_type
+    attributes:
+      label: Facility type
+      options:
+        - hyperscale
+        - colocation
+        - enterprise
+        - edge
+        - government
+        - research
+        - unknown
+  - type: input
+    id: power_capacity_mw
+    attributes:
+      label: Power capacity (MW)
+      placeholder: "e.g. 50"
+  - type: dropdown
+    id: ai_workload
+    attributes:
+      label: Known AI workload
+      options:
+        - training
+        - inference
+        - both
+        - none
+        - unknown
+  - type: input
+    id: ai_tenants
+    attributes:
+      label: Known AI tenants
+      placeholder: "e.g. OpenAI, Anthropic"
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: URLs that verify this data center exists (required)
+      placeholder: |
+        https://example.com/article-about-this-datacenter
+        https://permits.example.gov/filing/12345
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Anything else relevant — cooling type, grid operator, fiber connectivity, etc.
