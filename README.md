@@ -8,7 +8,7 @@ Governments regulate what they can see. The public oversees what it can find. Th
 
 [![License: ODbL-1.0](https://img.shields.io/badge/License-ODbL--1.0-blue.svg)](https://opendatacommons.org/licenses/odbl/1-0/)
 [![Data: CSV + GeoJSON](https://img.shields.io/badge/Data-CSV%20%2B%20GeoJSON-green.svg)](#data-formats)
-[![Facilities](https://img.shields.io/badge/Facilities-18%2C000%2B-orange.svg)](#status)
+[![Facilities](https://img.shields.io/badge/Facilities-18%2C524-orange.svg)](#status)
 
 ---
 
@@ -54,9 +54,10 @@ Full schema: [`data/schema.json`](data/schema.json)
 
 | Format | Path | Use case |
 |---|---|---|
-| CSV | `data/datacenters.csv` | Analysis, spreadsheets |
-| GeoJSON | `data/datacenters.geojson` | Maps, GIS tools |
-| JSON | `data/datacenters.json` | APIs, applications |
+| CSV | `data/datacenters.csv` | Analysis, spreadsheets, the canonical source |
+| GeoJSON | `data/datacenters.geojson` | Maps, GIS tools (records with coordinates only) |
+
+JSON can be generated locally via `python scripts/seed.py`.
 
 ## Seed data
 

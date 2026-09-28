@@ -29,8 +29,10 @@ OUTPUT_CSV = REPO_ROOT / "data" / "datacenters.csv"
 OUTPUT_JSON = REPO_ROOT / "data" / "datacenters.json"
 OUTPUT_GEOJSON = REPO_ROOT / "data" / "datacenters.geojson"
 
-GDCM_CSV_URL = "https://raw.githubusercontent.com/Ringmast4r/Global-Data-Center-Map/main/data-center-locations.csv"
-COMPUTE_ATLAS_URL = "https://raw.githubusercontent.com/ek33450505/compute-atlas/main/data/compute_atlas_data.csv"
+GDCM_CSV_URL = "https://raw.githubusercontent.com/Ringmast4r/Global-Data-Center-Map/main/datacenters.csv"
+COMPUTE_ATLAS_JSON_URL = "https://raw.githubusercontent.com/ek33450505/compute-atlas/main/data/facilities.json"
+
+COUNTRY_TO_CODE = {}  # populated at runtime from GDCM data
 
 COLUMNS = [
     "id", "name", "operator", "owner", "address", "city", "state_province",
@@ -67,6 +69,7 @@ def make_id(country_code, name, seen_ids):
 
 
 def fetch_gdcm():
+    """GDCM CSV columns: name, company, city, state, country, address (no lat/lon)."""
     print("Fetching Global-Data-Center-Map...")
     resp = requests.get(GDCM_CSV_URL, timeout=120)
     resp.raise_for_status()
@@ -75,32 +78,22 @@ def fetch_gdcm():
     seen_ids = set()
 
     for row in reader:
-        cc = (row.get("country_code") or row.get("countryCode") or "XX").strip().upper()
-        if len(cc) != 2:
-            cc = "XX"
-        name = (row.get("name") or row.get("facility_name") or "").strip()
+        name = (row.get("name") or "").strip()
         if not name:
             continue
 
-        lat = row.get("latitude") or row.get("lat") or ""
-        lon = row.get("longitude") or row.get("lng") or row.get("lon") or ""
-        try:
-            lat = float(lat)
-            lon = float(lon)
-        except (ValueError, TypeError):
-            lat, lon = "", ""
+        country = (row.get("country") or "").strip()
+        cc = "XX"
 
         record = {col: "" for col in COLUMNS}
         record["id"] = make_id(cc, name, seen_ids)
         record["name"] = name
-        record["operator"] = (row.get("operator") or row.get("company") or "").strip()
+        record["operator"] = (row.get("company") or "").strip()
         record["address"] = (row.get("address") or "").strip()
         record["city"] = (row.get("city") or "").strip()
-        record["state_province"] = (row.get("state") or row.get("region") or "").strip()
-        record["country"] = (row.get("country") or "").strip()
+        record["state_province"] = (row.get("state") or "").strip()
+        record["country"] = country
         record["country_code"] = cc
-        record["latitude"] = lat
-        record["longitude"] = lon
         record["status"] = "operational"
         record["facility_type"] = "unknown"
         record["ai_workload"] = "unknown"
@@ -117,48 +110,60 @@ def fetch_gdcm():
 
 
 def fetch_compute_atlas():
+    """Compute Atlas is JSON with nested location/capacityMw objects."""
     print("Fetching Compute Atlas...")
-    resp = requests.get(COMPUTE_ATLAS_URL, timeout=120)
+    resp = requests.get(COMPUTE_ATLAS_JSON_URL, timeout=120)
     resp.raise_for_status()
-    reader = csv.DictReader(StringIO(resp.text))
+    facilities = resp.json()
     records = []
     seen_ids = set()
 
-    for row in reader:
-        name = (row.get("name") or row.get("facility_name") or "").strip()
+    for fac in facilities:
+        name = (fac.get("name") or "").strip()
         if not name:
             continue
 
-        lat = row.get("latitude") or row.get("lat") or ""
-        lon = row.get("longitude") or row.get("lng") or row.get("lon") or ""
+        loc = fac.get("location") or {}
+        lat = loc.get("lat", "")
+        lon = loc.get("lon", "")
         try:
             lat = float(lat)
             lon = float(lon)
         except (ValueError, TypeError):
             lat, lon = "", ""
 
-        power = row.get("capacity_mw") or row.get("power_mw") or row.get("capacity_gw") or ""
+        cap = fac.get("capacityMw") or {}
+        power = cap.get("operational") or cap.get("total") or ""
         if power:
             try:
-                power_mw = float(power)
-                if "gw" in (row.get("capacity_gw") or "").lower() or power_mw < 1:
-                    power_mw = power_mw * 1000
-                power = str(power_mw)
-            except ValueError:
+                power = str(float(power))
+            except (ValueError, TypeError):
                 power = ""
+
+        status = fac.get("status", "operational")
+        if status not in ("operational", "construction", "planned", "decommissioned"):
+            status = "operational"
+
+        source_urls = []
+        for s in (fac.get("sources") or []):
+            url = s.get("url", "") if isinstance(s, dict) else str(s)
+            if url:
+                source_urls.append(url)
+        if not source_urls:
+            source_urls = ["https://www.compute-atlas.com/data"]
 
         record = {col: "" for col in COLUMNS}
         record["id"] = make_id("us", name, seen_ids)
         record["name"] = name
-        record["operator"] = (row.get("operator") or row.get("company") or "").strip()
-        record["address"] = (row.get("address") or "").strip()
-        record["city"] = (row.get("city") or "").strip()
-        record["state_province"] = (row.get("state") or "").strip()
+        record["operator"] = (fac.get("operator") or "").strip()
+        record["address"] = (loc.get("street") or "").strip()
+        record["city"] = (loc.get("city") or "").strip()
+        record["state_province"] = (loc.get("state") or "").strip()
         record["country"] = "United States"
         record["country_code"] = "US"
         record["latitude"] = lat
         record["longitude"] = lon
-        record["status"] = "operational"
+        record["status"] = status
         record["facility_type"] = "unknown"
         record["power_capacity_mw"] = power
         record["ai_workload"] = "unknown"
@@ -166,7 +171,7 @@ def fetch_compute_atlas():
         record["gpu_cluster_known"] = "false"
         record["submarine_cable_landing"] = "false"
         record["government_facility"] = "false"
-        record["sources"] = "https://www.compute-atlas.com/data"
+        record["sources"] = ";".join(source_urls)
         record["seed_source"] = "compute-atlas"
         records.append(record)
 
